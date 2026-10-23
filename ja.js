@@ -151,13 +151,13 @@ const JA = {
   '⚠️ Inconclusive (timed out)':
     '⚠️ 判定できません（時間内に応答がありませんでした）',
   '✅ Did not connect':
-    '⚠️ 接続失敗（証明書の拒否や通信エラーなど）',
+    '✅ 接続されませんでした（証明書の拒否や通信エラーなど）',
   'not yet checked':
     'まだテストしていません',
   'checking…':
     '接続をテスト中…',
   'Your browser trusted {n} of {total} compromised certificate chains.':
-    '接続テスト{total}件のうち，{n}件で侵害された中間CAを使った接続に成功しました。接続失敗だけでは，安全とは断定できません。この結果はこのブラウザでの確認に限ります。Go製アプリなど，別のソフトウェアの状態は個別に確認してください。',
+    '接続テスト{total}件のうち，{n}件で侵害された中間CAを使った接続に成功しました。この検査では，証明書を拒否して接続しないことが期待されます。ただし，通信エラーでも接続できないため，この結果だけで安全とは断定できません。確認できるのはこのブラウザの状態だけです。Go製アプリなど，別のソフトウェアは個別に確認してください。',
   ' {unknown} timed out or returned an unexpected response, so the result is incomplete. Please try again later, or from a network without a TLS-intercepting proxy.':
     ' {unknown}件は時間内に応答がないか，テスト用の応答を確認できませんでした。時間をおいて再試行するか，通信を中継・検査するプロキシを経由しないネットワークからお試しください。',
   'Run again':
