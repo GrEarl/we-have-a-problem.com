@@ -55,10 +55,20 @@
     abbr[title] { cursor: help; }
     small { color: #808080; }
     button { font: inherit; font-size: .9rem; padding: .2rem .6rem; }
+
+    .archive-notice { margin-bottom: 2rem; padding: 1rem; border: 2px solid #a66700; background: #fff8e6; color: #513500; line-height: 1.7; }
+    .archive-notice strong { display: block; margin-bottom: .35rem; }
+    .archive-notice a { text-decoration: underline; }
   </style>
 </head>
 <body>
 <div class="container">
+
+<aside class="archive-notice" role="note" lang="ja" aria-labelledby="archive-notice-title">
+  <strong id="archive-notice-title">このミラーは更新を終了しました</strong>
+  <div>このページは，元サイトでの日本語対応を待つために公開した旧版で，今後は更新されません。</div>
+  <div>日本語版の更新は元サイトで続けています。最新の情報は<a href="https://emudhra.we-have-a-problem.com/ja" hreflang="ja">元サイトの日本語版</a>をご覧ください。</div>
+</aside>
 
 <p style="text-align: right"><a href="?lang=en" lang="en" hreflang="en" data-language="en">English</a> / <a href="?lang=ja" lang="ja" hreflang="ja" data-language="ja">日本語</a></p>
 
@@ -530,3 +540,4 @@ window.addEventListener('hashchange', openLinkedWorkaround);
 </script>
 </body>
 </html>
+
