@@ -23,6 +23,7 @@
     a { color: #0074d9; text-decoration: none; }
     a:hover, a:focus { text-decoration: underline; }
     h1, h2, h3 { margin: 0 0 0.5rem -0.1rem; line-height: 1; color: #111; }
+    h1:lang(ja), h2:lang(ja), h3:lang(ja) { line-height: 1.4; }
     h2 a, h3 a { color: inherit; }
     h1 { font-size: 2rem; margin-bottom: 1rem; }
     @media (min-width: 30rem) { h1 { font-size: 2.5rem; margin-bottom: 3rem; } }
@@ -49,6 +50,7 @@
     .good { color: #090; }
     .bad { color: #c00; }
     .pending { color: #999; }
+    html:lang(ja) .good, html:lang(ja) .pending, html:lang(ja) #summary { color: #666; }
     abbr[title] { cursor: help; }
     small { color: #808080; }
     button { font: inherit; font-size: .9rem; padding: .2rem .6rem; }
@@ -56,6 +58,8 @@
 </head>
 <body>
 <div class="container">
+
+<p style="text-align: right"><a href="?lang=en" lang="en" hreflang="en" data-language="en">English</a> / <a href="?lang=ja" lang="ja" hreflang="ja" data-language="ja">日本語</a></p>
 
 <h1>eMudhra Intermediate CA Compromise</h1>
 
@@ -67,7 +71,7 @@
 
 <p>To demonstrate that the keys are compromised, the original reporter Wayne signed the following message with the private key of each of the eight intermediate CAs and reported it to the Root Program Teams on the 17th of October:</p>
 
-<blockquote><p>We have a problem here - Wayne</p></blockquote>
+<blockquote lang="en"><p>We have a problem here - Wayne</p></blockquote>
 
 <p><a href="proof.zip">proof.zip</a> contains the message, and for each intermediate the certificate, its public key and a signature on the message. To verify with OpenSSL:</p>
 <pre>openssl x509 -in EM-DV-TLS-CA-G3B.crt.pem -noout -pubkey | diff - EM-DV-TLS-CA-G3B.pub.pem
@@ -332,7 +336,44 @@ certctl rehash
 
 </div>
 
+<script src="ja.js"></script>
 <script>
+// An explicit choice takes precedence over the browser's preferred supported language.
+const requestedLanguage = new URLSearchParams(location.search).get('lang');
+const preferredLanguage = (navigator.languages?.length ? navigator.languages : [navigator.language])
+  .map(lang => (lang || '').toLowerCase().split('-')[0])
+  .find(lang => lang === 'ja' || lang === 'en') || 'en';
+const language = ['ja', 'en'].includes(requestedLanguage) ? requestedLanguage : preferredLanguage;
+const messages = language === 'ja' && typeof JA !== 'undefined' ? JA : null;
+
+function t(english) {
+  return messages && Object.hasOwn(messages, english) ? messages[english] : english;
+}
+
+// Keep the original English if the translation file cannot be loaded.
+document.documentElement.lang = messages ? 'ja' : 'en';
+if (messages) {
+  // Match complete fragments so edits to links or inline code also invalidate translations.
+  document.querySelectorAll('title, h1, h2, h3, h4, p, th, td, button, a.pending').forEach(el => {
+    if (el.closest('blockquote, pre, code')) return;
+    const english = el.innerHTML;
+    const translated = t(english);
+    el.lang = translated === english ? 'en' : 'ja';
+    if (translated !== english) el.innerHTML = translated;
+  });
+  document.querySelectorAll('meta[content]').forEach(el => { el.content = t(el.content); });
+}
+
+function updateLanguageLinks() {
+  document.querySelectorAll('[data-language]').forEach(link => {
+    const url = new URL(location.href);
+    url.searchParams.set('lang', link.dataset.language);
+    link.href = url.href;
+  });
+}
+updateLanguageLinks();
+window.addEventListener('hashchange', updateLanguageLinks);
+
 // Hosts under test. Each intermediate is served twice: first chaining to its
 // emSign root, then via the Sectigo cross-sign chaining to AAA Certificate
 // Services. The `noct` hosts serve a leaf that was never logged to Certificate
@@ -355,8 +396,8 @@ const HOSTS = [
   { host: 'dv-g3b-noct-emudhra.we-have-a-problem.com',     label: 'CN=EM DV TLS CA - G3B, O=eMudhra BV, C=NL', root: 'emSign Root TLS CA - G3', noct: true },
   { host: 'dv-g3b-aaa-noct-emudhra.we-have-a-problem.com', label: 'CN=EM DV TLS CA - G3B, O=eMudhra BV, C=NL', root: 'AAA Certificate Services', noct: true },
 ];
-const NOCT_TITLE = 'No Certificate Transparency: this certificate was never logged to CT and has no SCTs. ' +
-  'Clients that enforce CT, such as Chrome, Safari and Firefox, reject it even if they still trust the intermediate.';
+const NOCT_TITLE = t('No Certificate Transparency: this certificate was never logged to CT and has no SCTs. ' +
+  'Clients that enforce CT, such as Chrome, Safari and Firefox, reject it even if they still trust the intermediate.');
 const TIMEOUT_MS = 10000;
 // Present in every test server's response body. A response without it came
 // from something else, such as a TLS-intercepting proxy's block page.
@@ -382,14 +423,14 @@ async function probe(host) {
     // responses say nothing about whether this browser trusts the chain.
     const body = await res.text();
     if (!body.includes(EXPECTED_BODY)) {
-      return { status: 'unknown', text: `⚠️ Inconclusive (unexpected HTTP ${res.status} response)` };
+      return { status: 'unknown', text: t('⚠️ Inconclusive (unexpected HTTP {status} response)').replace('{status}', res.status) };
     }
-    return { status: 'connected', text: '❌ Insecure' };
+    return { status: 'connected', text: t('❌ Insecure') };
   } catch (err) {
     // A slow server is not evidence that the chain was rejected.
-    if (err.name === 'AbortError') return { status: 'unknown', text: '⚠️ Inconclusive (timed out)' };
+    if (err.name === 'AbortError') return { status: 'unknown', text: t('⚠️ Inconclusive (timed out)') };
     // Browsers report TLS failures and network errors identically here.
-    return { status: 'blocked', text: '✅ Did not connect' };
+    return { status: 'blocked', text: t('✅ Did not connect') };
   } finally {
     clearTimeout(timer);
   }
@@ -408,7 +449,7 @@ const cells = HOSTS.map(({ host, label, root, noct }) => {
     abbr.title = NOCT_TITLE; abbr.textContent = 'No CT';
     tdName.append(' (', abbr, ')');
   }
-  const tdResult = cell('not yet checked', 'pending');
+  const tdResult = cell(t('not yet checked'), 'pending');
   tr.append(tdName, cell(root), tdResult);
   resultsBody.appendChild(tr);
   return tdResult;
@@ -417,7 +458,7 @@ const cells = HOSTS.map(({ host, label, root, noct }) => {
 async function run() {
   summary.textContent = '';
   for (const td of cells) {
-    td.textContent = 'checking…';
+    td.textContent = t('checking…');
     td.className = 'pending';
   }
   const results = await Promise.all(HOSTS.map(async ({ host }, i) => {
@@ -428,9 +469,17 @@ async function run() {
   }));
   const n = results.filter(s => s === 'connected').length;
   const unknown = results.filter(s => s === 'unknown').length;
-  summary.textContent = `Your browser trusted ${n} of ${HOSTS.length} compromised certificate chains.` +
-    (unknown ? ` ${unknown} timed out or returned an unexpected response, so the result is incomplete. ` +
-      'Please try again later, or from a network without a TLS-intercepting proxy.' : '');
+  const summaryTemplate = 'Your browser trusted {n} of {total} compromised certificate chains.';
+  summary.lang = messages && Object.hasOwn(messages, summaryTemplate) ? 'ja' : 'en';
+  summary.textContent = t(summaryTemplate).replace('{n}', n).replace('{total}', HOSTS.length);
+  if (unknown) {
+    const incompleteTemplate = ' {unknown} timed out or returned an unexpected response, so the result is incomplete. ' +
+      'Please try again later, or from a network without a TLS-intercepting proxy.';
+    const incomplete = document.createElement('span');
+    incomplete.lang = messages && Object.hasOwn(messages, incompleteTemplate) ? 'ja' : 'en';
+    incomplete.textContent = t(incompleteTemplate).replace('{unknown}', unknown);
+    summary.appendChild(incomplete);
+  }
 }
 
 // Disable the button until the run has finished and the cooldown has passed.
@@ -438,7 +487,7 @@ async function start() {
   observer.disconnect();
   rerun.disabled = true;
   await Promise.all([run(), new Promise(r => setTimeout(r, COOLDOWN_MS))]);
-  rerun.textContent = 'Run again';
+  rerun.textContent = t('Run again');
   rerun.disabled = false;
 }
 
