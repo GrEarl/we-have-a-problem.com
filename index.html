@@ -427,6 +427,8 @@ async function probe(host) {
     }
     return { status: 'connected', text: t('❌ Insecure') };
   } catch (err) {
+    // Treat a reported offline state as inconclusive, not evidence of certificate rejection.
+    if (navigator.onLine === false) return { status: 'unknown', text: t('⚠️ Inconclusive (browser reports being offline)') };
     // A slow server is not evidence that the chain was rejected.
     if (err.name === 'AbortError') return { status: 'unknown', text: t('⚠️ Inconclusive (timed out)') };
     // Browsers report TLS failures and network errors identically here.
@@ -473,7 +475,7 @@ async function run() {
   summary.lang = messages && Object.hasOwn(messages, summaryTemplate) ? 'ja' : 'en';
   summary.textContent = t(summaryTemplate).replace('{n}', n).replace('{total}', HOSTS.length);
   if (unknown) {
-    const incompleteTemplate = ' {unknown} timed out or returned an unexpected response, so the result is incomplete. ' +
+    const incompleteTemplate = ' {unknown} checks were inconclusive, so the result is incomplete. ' +
       'Please try again later, or from a network without a TLS-intercepting proxy.';
     const incomplete = document.createElement('span');
     incomplete.lang = messages && Object.hasOwn(messages, incompleteTemplate) ? 'ja' : 'en';

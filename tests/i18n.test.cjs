@@ -109,6 +109,39 @@ test('changed checker templates fall back to English and still substitute curren
   }
 });
 
+test('checker distinguishes reported offline failures without hiding a successful connection', async () => {
+  const probeSource = html.match(/async function probe\(host\) \{[\s\S]*?\n\}/)[0];
+  const expectedBody = vm.runInNewContext(html.match(/const EXPECTED_BODY = ([^\n]+);/)[1]);
+  const goodResponse = { status: 200, text: async () => expectedBody };
+  const unexpectedResponse = { status: 502, text: async () => 'proxy block page' };
+  const timeout = Object.assign(new Error('timeout'), { name: 'AbortError' });
+  const networkError = new TypeError('Failed to fetch');
+  for (const language of ['en', 'ja']) {
+    for (const [online, response, error, status, symbol] of [
+      [true, goodResponse, null, 'connected', '❌'],
+      [true, unexpectedResponse, null, 'unknown', '⚠️'],
+      [true, null, timeout, 'unknown', '⚠️'],
+      [true, null, networkError, 'blocked', '✅'],
+      [false, null, networkError, 'unknown', '⚠️'],
+      [false, goodResponse, null, 'connected', '❌'],
+    ]) {
+      const page = render([language]);
+      page.context.navigator.onLine = online;
+      Object.assign(page.context, {
+        AbortController, setTimeout: () => 0, clearTimeout: () => {},
+        TIMEOUT_MS: 10000, EXPECTED_BODY: expectedBody,
+        fetch: async () => { if (error) throw error; return response; },
+      });
+      vm.runInContext(probeSource, page.context);
+      const result = await vm.runInContext('probe("test.example")', page.context);
+      assert.equal(result.status, status);
+      assert.ok(result.text.startsWith(symbol), result.text);
+      if (!online && error) assert.match(result.text, /offline|オフライン/);
+      if (response === unexpectedResponse) assert.ok(result.text.includes('502'));
+    }
+  }
+});
+
 test('language links preserve query parameters and follow the current section', () => {
   const page = render(['ja'], '?ref=review&lang=ja');
   assert.equal(page.links[0].href, 'https://example.com/?ref=review&lang=en#check');
