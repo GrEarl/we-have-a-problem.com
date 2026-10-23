@@ -117,10 +117,13 @@ test('language links preserve query parameters and follow the current section', 
   assert.equal(page.links[1].href, 'https://example.com/?ref=review&lang=ja#windows');
 });
 
-test('all translation pairs preserve links, inline code, and placeholders, including stale entries', () => {
+test('all translation pairs preserve status symbols, links, inline code, and placeholders, including stale entries', () => {
   const values = (text, pattern) => [...text.matchAll(pattern)].map(match => match[1]).sort();
   // Unused translations are allowed: upstream English updates must not require a translation update.
   for (const [english, translation] of Object.entries(dictionary)) {
+    for (const symbol of ['✅', '❌', '⚠️']) {
+      if (english.startsWith(symbol)) assert.ok(translation.startsWith(symbol), english);
+    }
     for (const pattern of [/href="([^"]*)"/g, /<code>([\s\S]*?)<\/code>/g, /(\{\w+\})/g]) {
       assert.deepEqual(values(translation, pattern), values(english, pattern), english);
     }
