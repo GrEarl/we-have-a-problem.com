@@ -284,7 +284,7 @@ sudo chmod 644 "$F"</pre>
   <li><p>Expand <strong>Trust</strong> and change <strong>When using this certificate</strong> to <strong>Never Trust</strong>. Close the certificate window and authenticate if prompted to save the change.</p>
     <p><img src="images/macos-keychain-never-trust.png" alt="Certificate Trust menu showing the Never Trust option" width="998" height="852" loading="lazy"></p></li>
 </ol>
-<p>This blocks all chains through that root, including unrelated certificates. It does not block chains through <code translate="no">AAA Certificate Services</code> or update applications with their own CA bundles; those still need the PEM workaround above or their own updates. To undo this change, restore the certificate's previous trust settings.</p>
+<p>This blocks all chains through that root, including unrelated certificates. It does not block chains through <code translate="no">AAA Certificate Services</code>, and applications with their own CA bundles still need their own updates. To undo this change, restore the certificate's previous trust settings.</p>
 <p>After making changes, rerun the <a href="#check">browser and curl checks</a>. A connection failure alone does not prove that a certificate was rejected.</p>
 </details>
 
