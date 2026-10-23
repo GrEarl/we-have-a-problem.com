@@ -101,7 +101,7 @@ test('changed checker templates fall back to English and still substitute curren
   const updated = 'Your browser accepted {n} of {total} certificate chains.';
   const translate = english => vm.runInContext(`t(${JSON.stringify(english)})`, page.context);
   assert.equal(translate(message).replace('{n}', 1).replace('{total}', 14),
-    '接続テスト14件のうち，1件で侵害された中間CAを使った接続に成功しました。接続失敗だけでは，安全とは断定できません。この結果はこのブラウザでの確認に限ります。Go製アプリなど，別のソフトウェアの状態は個別に確認してください。');
+    '接続テスト14件のうち，1件で侵害された中間CAを使った接続に成功しました。この検査では，証明書を拒否して接続しないことが期待されます。ただし，通信エラーでも接続できないため，この結果だけで安全とは断定できません。確認できるのはこのブラウザの状態だけです。Go製アプリなど，別のソフトウェアは個別に確認してください。');
   assert.equal(translate(updated).replace('{n}', 2).replace('{total}', 16),
     'Your browser accepted 2 of 16 certificate chains.');
   for (const english of ['constructor', 'toString', '__proto__', 'New message']) {
