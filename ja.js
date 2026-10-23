@@ -102,12 +102,28 @@ const JA = {
     '追加情報は<a href="https://github.com/galadran/we-have-a-problem.com">github.com/galadran/we-have-a-problem.com</a>へお寄せください。',
   '<a href="#workarounds">Are there workarounds until patches are available?</a>':
     '<a href="#workarounds">修正版が提供されるまでの回避策</a>',
-  'macOS curl, git, and Python':
-    'macOSのcurl，git，Python',
   'macOS blocks the compromised intermediates, but the built-in <code>curl</code>, <code>git</code>, <code>python3</code>, <code>perl</code>, <code>ruby</code>, and <code>openssl</code> verify certificates against <code>/etc/ssl/cert.pem</code> without checking revocation, and that file has not been updated. To remove the affected roots from it, run:':
     'macOSは侵害された中間CAをブロックしていますが，標準搭載の<code>curl</code>，<code>git</code>，<code>python3</code>，<code>perl</code>，<code>ruby</code>，<code>openssl</code>は，失効を確認せずに<code>/etc/ssl/cert.pem</code>で証明書を検証します。このファイルはまだ更新されていません。影響を受けるルート証明書をこのファイルから削除するには，次を実行します。',
   'The built-in <code>pip3</code>, and the <code>pip</code> in virtual environments created from the built-in <code>python3</code>, use their own outdated copy of the roots instead. To make them use the fixed system file, run:':
     '標準搭載の<code>pip3</code>と，標準搭載の<code>python3</code>から作成した仮想環境内の<code>pip</code>は，代わりに独自の古いルート証明書のコピーを使用します。修正したシステムファイルを使わせるには，次を実行します。',
+  'Additional Keychain Access workaround':
+    'キーチェーンアクセスで追加の対策を行う',
+  "Some macOS clients can still accept the emSign chain after the PEM workaround above, as <a href=\"https://github.com/galadran/we-have-a-problem.com/issues/65\">reported in issue #65</a>. For an additional local block, you can set <code>emSign ECC Root CA - G3</code> to <strong>Never Trust</strong> in Keychain Access:":
+    "macOSの一部のクライアントでは，上記のPEMファイルの対策後もemSign経由の接続に成功することが，<a href=\"https://github.com/galadran/we-have-a-problem.com/issues/65\">Issue #65で報告されています</a>。追加のローカル対策として，キーチェーンアクセスで<code>emSign ECC Root CA - G3</code>を<strong>Never Trust（常に信頼しない）</strong>に設定できます。",
+  "Press <strong>Command-Space</strong>, search for <strong>Keychain Access</strong>, and choose <strong>Open Keychain Access</strong>. Authenticate with Touch ID or your password if prompted.":
+    "<strong>⌘Command + Space</strong>を押して<strong>Keychain Access（キーチェーンアクセス）</strong>を検索し，<strong>Open Keychain Access（キーチェーンアクセスを開く）</strong>を選択します。求められたらTouch IDまたはパスワードで認証します。",
+  "Select <strong>System Roots</strong> &gt; <strong>Certificates</strong>, search for <strong>emSign</strong>, and double-click <strong>emSign ECC Root CA - G3</strong>.":
+    "<strong>System Roots（システムルート）</strong> &gt; <strong>Certificates（証明書）</strong>を選択し，<strong>emSign</strong>を検索して<strong>emSign ECC Root CA - G3</strong>をダブルクリックします。",
+  "<img src=\"images/macos-keychain-root.png\" alt=\"Keychain Access: emSign ECC Root CA - G3 selected in System Roots\" width=\"1712\" height=\"1000\" loading=\"lazy\">":
+    "<img src=\"images/macos-keychain-root.png\" alt=\"キーチェーンアクセス：システムルートでemSign ECC Root CA - G3を選択\" width=\"1712\" height=\"1000\" loading=\"lazy\">",
+  "Expand <strong>Trust</strong> and change <strong>When using this certificate</strong> to <strong>Never Trust</strong>. Close the certificate window and authenticate if prompted to save the change.":
+    "<strong>Trust（信頼）</strong>を開き，<strong>When using this certificate（この証明書を使用するとき）</strong>を<strong>Never Trust（常に信頼しない）</strong>に変更します。証明書のウインドウを閉じ，認証を求められたら認証して変更を保存します。",
+  "<img src=\"images/macos-keychain-never-trust.png\" alt=\"Certificate Trust menu showing the Never Trust option\" width=\"998\" height=\"852\" loading=\"lazy\">":
+    "<img src=\"images/macos-keychain-never-trust.png\" alt=\"証明書の信頼メニューにあるNever Trust（常に信頼しない）の選択肢\" width=\"998\" height=\"852\" loading=\"lazy\">",
+  "This blocks all chains through that root, including unrelated certificates. It does not block chains through <code>AAA Certificate Services</code> or update applications with their own CA bundles; those still need the PEM workaround above or their own updates. To undo this change, restore the certificate's previous trust settings.":
+    "この設定は，今回の問題と無関係な証明書も含め，このルートを経由するすべての証明書チェーンを拒否します。<code>AAA Certificate Services</code>経由のチェーンや，独自のCAバンドルを使うアプリには，この設定だけでは対応できません。上記のPEMファイルの対策や，各アプリの更新も必要です。元に戻すには，証明書の信頼設定を変更前の状態に戻してください。",
+  "After making changes, rerun the <a href=\"#check\">browser and curl checks</a>. A connection failure alone does not prove that a certificate was rejected.":
+    "変更後は，<a href=\"#check\">ブラウザとcurlの接続テスト</a>を再実行してください。接続失敗だけでは，証明書が拒否されたとは断定できません。",
   'For nix-darwin users, please <strong>additionally</strong> follow NixOS instructions.':
     'nix-darwinをお使いの場合は，<strong>加えて</strong>NixOSの手順にも従ってください。',
   'Until a distribution ships an updated <code>ca-certificates</code> package, expert users can distrust the affected roots in the system trust store. This is NOT recommended for ordinary users.':
